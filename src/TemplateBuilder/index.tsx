@@ -1,5 +1,4 @@
 import React, {
-  useEffect,
   useImperativeHandle,
   useState,
   useRef,
@@ -7,9 +6,14 @@ import React, {
   RefObject
 } from 'react'
 
+// @ts-ignore TODO: https://github.com/cssinjs/jss/pull/1155
+import { createUseStyles, ThemeProvider, jss } from 'react-jss'
+
+import createTheme, { ITheme } from '../theme'
+import createStyles, { IStyles } from '../styles'
+
 import { injectStyle } from './helpers/inject-style'
 import createConfiguration from './configuration'
-import createStyles from '../styles'
 
 export interface BuilderRef {
   getDom(): HTMLDocument | null
@@ -18,24 +22,27 @@ export interface BuilderRef {
 
 export interface Config {
   editableAttribute?: string
-  styles?: Object
 }
 
 export interface IProps {
   html: string
   builderRef?: RefObject<BuilderRef>
   config?: Config
+  theme?: ITheme
+  styles?: IStyles
   onLoad(arg0: HTMLDocument): void
 }
 
 function TemplateBuilder(props: IProps) {
-  const frameRef = useRef<HTMLIFrameElement>(null)
-  const [dom, setDom] = useState<HTMLDocument | null>(null)
   const config: Config = createConfiguration(props.config)
+  const frameRef = useRef<HTMLIFrameElement>(null)
 
-  useEffect(() => {
-    return () => {}
-  }, [])
+  const [dom, setDom] = useState<HTMLDocument | null>(null)
+
+  const theme: ITheme = createTheme(props.theme as ITheme)
+  const styles: IStyles = createStyles(config, theme, props.styles)
+
+  const usedStyles = createUseStyles(styles)()
 
   const handleFrameLoad = (e: any) => {
     const doc: HTMLDocument = e.target.contentWindow.document
@@ -43,11 +50,8 @@ function TemplateBuilder(props: IProps) {
     // set dom state
     setDom(doc)
 
-    // create required styles
-    const styles = createStyles(config)
-
     // inject required styles to the iframe
-    injectStyle(doc, styles.toString())
+    injectStyle(doc, jss.createStyleSheet(styles).toString())
 
     setupTriggers(doc)
 
@@ -84,21 +88,21 @@ function TemplateBuilder(props: IProps) {
   }))
 
   return (
-    <>
-      <iframe
-        ref={frameRef}
-        srcDoc={props.html}
-        title="uzum-frame"
-        className="uzum--frame"
-        frameBorder="0"
-        allowFullScreen
-        onLoad={handleFrameLoad}
-        style={{
-          width: '100%',
-          height: '100%'
-        }}
-      />
-    </>
+    <ThemeProvider theme={theme}>
+      <div className={usedStyles.container}>
+        <iframe
+          className={usedStyles.iframe}
+          ref={frameRef}
+          srcDoc={props.html}
+          title="uzum-frame"
+          frameBorder="0"
+          allowFullScreen
+          onLoad={handleFrameLoad}
+        />
+
+        <div className={usedStyles.sidebar}>00</div>
+      </div>
+    </ThemeProvider>
   )
 }
 

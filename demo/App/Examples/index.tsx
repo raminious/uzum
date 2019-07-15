@@ -19,7 +19,7 @@ const Examples: React.FC = () => {
       <div
         style={{
           background: '#eee',
-          padding: '0.5rem'
+          height: '5vh'
         }}
       >
         <button type="button" onClick={() => builder.current.resetTemplate()}>
@@ -32,6 +32,14 @@ const Examples: React.FC = () => {
         ref={builder}
         config={{
           editableAttribute: 'editable'
+        }}
+        theme={{
+          editableBorderWidth: 1
+        }}
+        styles={{
+          container: {
+            height: '95vh'
+          }
         }}
         onLoad={handleLoadTemplate}
       />

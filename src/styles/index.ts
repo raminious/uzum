@@ -1,32 +1,59 @@
 import jss from 'jss'
 import preset from 'jss-preset-default'
 
+import { ITheme } from '../theme'
 import { Config } from '../TemplateBuilder'
 
 jss.setup(preset())
 
-export default function createStyles(config: Config): any {
-  const editableAttribute = `[${config.editableAttribute}]`
+export interface IStyles {
+  global?: React.CSSProperties
+  container?: React.CSSProperties
+  sidebar?: React.CSSProperties
+  iframe?: React.CSSProperties
+  extended?: React.CSSProperties
+}
 
-  const styles = {
+export default function createStyles(
+  config: Config,
+  theme: ITheme,
+  styles: IStyles = {}
+): object {
+  const editableAttribute: string = `[${config.editableAttribute}]`
+
+  const defaultStyles = {
     '@global': {
       [editableAttribute]: {
-        border: '1px solid transparent',
+        border: `${theme.editableBorderWidth}px solid transparent`,
         cursor: 'pointer',
         '&:hover': {
-          border: '1px solid blue'
+          border: `${theme.editableBorderWidth}px solid ${theme.editableBorderColor}`
         }
       },
       '[contenteditable]': {
-        border: '1px dashed transparent',
+        border: `${theme.editableBorderWidth}px dashed transparent`,
         cursor: 'pointer',
         '&:hover': {
-          border: '1px solid transparent !important'
+          border: `${theme.editableBorderWidth}px solid transparent !important`
         }
-      }
+      },
+      ...styles.global
     },
-    ...config.styles
+    container: {
+      display: 'flex',
+      ...styles.container
+    },
+    sidebar: {
+      width: '30%',
+      ...styles.sidebar
+    },
+    iframe: {
+      width: '100%',
+      height: '100%',
+      ...styles.iframe
+    },
+    ...styles.extended
   }
 
-  return jss.createStyleSheet(styles)
+  return defaultStyles
 }

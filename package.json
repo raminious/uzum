@@ -75,7 +75,8 @@
   "dependencies": {
     "color": "^3.1.2",
     "jss": "^9.8.7",
-    "jss-preset-default": "^4.5.0"
+    "jss-preset-default": "^4.5.0",
+    "react-jss": "^10.0.0-alpha.22"
   },
   "devDependencies": {
     "@babel/core": "7.4.3",
