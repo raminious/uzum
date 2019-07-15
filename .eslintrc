@@ -31,7 +31,8 @@
           ".jsx",
           ".ts",
           ".tsx",
-          ".json"
+          ".json",
+          ".txt"
         ]
       },
       "webpack": {
