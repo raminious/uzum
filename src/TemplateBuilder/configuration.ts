@@ -1,7 +1,7 @@
 import { Config } from '.'
 
 const defaultConfig: Config = {
-  editableAttribute: 'editable'
+  editableAttribute: 'data-editable'
 }
 
 export default function createConfiguration(config) {

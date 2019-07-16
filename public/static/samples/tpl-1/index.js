@@ -16,17 +16,17 @@ export default `<!DOCTYPE html>
       <div class="ebys-container">
         <article class="ebys-block ebys-block01 block01-custom ebys-relative-block ebys-bg-white">
           <div class="ebys-v-align">
-            <strong editable="true"
+            <strong data-editable="true"
               class="ebys-element-block ebys-title ebys-text-uppercase ebys-text-secondary">
 
               Ramin
             </strong>
-            <h2 editable="true" class="price-part2">500,000</h2>
-            <div editable="true"
+            <h2 data-editable="true" class="price-part2">500,000</h2>
+            <div data-editable="true"
               class="ebys-image ebys-image11 ebys-relative-block ebys-bg-cover"
               style="background:url('/static/samples/tpl-1/home.jpg');background-size: cover;">
             </div>
-            <address editable="true" class="ebys-adress">
+            <address data-editable="true" class="ebys-adress">
               445 Mount Eden Road, Mount Eden, Auckland.
             </address>
           </div>

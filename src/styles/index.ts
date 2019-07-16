@@ -30,11 +30,16 @@ export default function createStyles(
           border: `${theme.editableBorderWidth}px solid ${theme.editableBorderColor}`
         }
       },
-      '[contenteditable]': {
-        border: `${theme.editableBorderWidth}px dashed transparent`,
+      '[contenteditable="true"]': {
+        // eslint-disable-next-line max-len
+        border: `${theme.editableBorderWidth}px solid ${theme.editableBorderColor} !important`,
+        borderRadius: '0 3px 3px 3px',
         cursor: 'pointer',
         '&:hover': {
-          border: `${theme.editableBorderWidth}px solid transparent !important`
+          border: `${theme.editableBorderWidth}px solid transparent`
+        },
+        '&:focus': {
+          outline: 'none'
         }
       },
       ...styles.global
@@ -45,6 +50,7 @@ export default function createStyles(
     },
     sidebar: {
       width: '30%',
+      backgroundColor: 'gray',
       ...styles.sidebar
     },
     iframe: {

@@ -31,7 +31,7 @@ const Examples: React.FC = () => {
         html={template}
         ref={builder}
         config={{
-          editableAttribute: 'editable'
+          editableAttribute: 'data-editable'
         }}
         theme={{
           editableBorderWidth: 1
