@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React from 'react'
 
 import Panel from './Panel'
@@ -12,6 +13,32 @@ const editablePlugin: Plugin.Instance = {
   },
   unload(target) {
     target.setAttribute('contenteditable', 'false')
+  },
+  styles(config: Config, theme: Theme): Styles {
+    const editableAttribute: string = `[${config.editableAttribute}]`
+
+    return {
+      global: {
+        [editableAttribute]: {
+          border: `${theme.editableBorderWidth}px solid transparent`,
+          cursor: 'pointer',
+          '&:hover': {
+            border: `${theme.editableBorderWidth}px solid ${theme.editableBorderColor}`
+          }
+        },
+        '[contenteditable="true"]': {
+          border: `${theme.editableBorderWidth}px solid ${theme.editableBorderColor} !important`,
+          borderRadius: `0 ${theme.editableBorderRadius}px ${theme.editableBorderRadius}px ${theme.editableBorderRadius}px`,
+          cursor: 'pointer',
+          '&:hover': {
+            border: `${theme.editableBorderWidth}px solid transparent`
+          },
+          '&:focus': {
+            outline: 'none'
+          }
+        }
+      }
+    }
   },
   inline({ bounds }: Plugin.Inline) {
     return (

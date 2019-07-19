@@ -1,7 +1,7 @@
 declare interface Styles {
-  global?: React.CSSProperties
+  global?: object
   container?: React.CSSProperties
   sidebar?: React.CSSProperties
   iframe?: React.CSSProperties
-  extended?: React.CSSProperties
+  extend?: React.CSSProperties
 }

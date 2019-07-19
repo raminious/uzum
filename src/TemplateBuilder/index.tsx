@@ -62,9 +62,11 @@ function TemplateBuilder(props: IProps) {
   const [activePlugin, setActivePlugin] = useState<Plugin.Instance | null>(null)
 
   const theme: Theme = createTheme(props.theme as Theme)
-  const styles: Styles = createStyles(config, theme, props.styles)
+  const styles: Styles = createStyles(config, theme, props.styles, activePlugin)
 
   const usedStyles = createUseStyles(styles)()
+
+  console.log('...', usedStyles, styles)
 
   useEffect(() => {
     const handleElementClick = (event: MouseEvent): void => {

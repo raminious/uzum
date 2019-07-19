@@ -20,6 +20,7 @@ declare namespace Plugin {
     hook(target: HTMLElement, config: Config): boolean
     load?(target: HTMLElement): void
     unload?(target: HTMLElement): void
+    styles?(config: Config, theme: Theme): Styles
     panel?({
       el,
       defaultClassName,
