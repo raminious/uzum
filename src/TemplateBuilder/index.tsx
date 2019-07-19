@@ -4,16 +4,17 @@ import React, {
   useRef,
   forwardRef,
   RefObject,
-  SyntheticEvent
+  SyntheticEvent,
+  useEffect
 } from 'react'
 
 // @ts-ignore TODO: https://github.com/cssinjs/jss/pull/1155
 import { createUseStyles, ThemeProvider, jss } from 'react-jss'
 
-import { resetEditableElements } from '../utils/reset-editable-elements'
+// import { resetEditableElements } from '../utils/reset-editable-elements'
 
-import createTheme, { ITheme } from '../theme'
-import createStyles, { IStyles } from '../styles'
+import createTheme from '../theme'
+import createStyles from '../styles'
 
 import { injectStyle } from './helpers/inject-style'
 
@@ -21,23 +22,34 @@ import createConfiguration from './configuration'
 
 import ToolbarContainer from './components/ToolbarContainer'
 import InlineEditor from './components/InlineEditor'
+import SidePanel from './components/SidePanel'
 
 export interface BuilderRef {
   getDom(): HTMLDocument | null
   resetTemplate(): void
-}
-
-export interface Config {
-  editableAttribute?: string
+  addStyle(styles: string): void
 }
 
 export interface IProps {
   html: string
   builderRef?: RefObject<BuilderRef>
   config?: Config
-  theme?: ITheme
-  styles?: IStyles
-  onLoad(arg0: HTMLDocument): void
+  theme?: Theme
+  styles?: Styles
+  children?: React.ReactNode
+  plugins?: Plugin.Instance[]
+  fixedSidebar?: boolean
+  onLoad?(doc: HTMLDocument): void
+  onSelectComponent?(component: HTMLElement): void
+}
+
+const defaultProps = {
+  plugins: [],
+  config: {},
+  theme: {},
+  fixedSidebar: true,
+  onLoad: () => null,
+  onSelectComponent: () => null
 }
 
 function TemplateBuilder(props: IProps) {
@@ -46,13 +58,60 @@ function TemplateBuilder(props: IProps) {
 
   const [dom, setDom] = useState<HTMLDocument | null>(null)
 
-  // eslint-disable-next-line
   const [activeElement, setActiveElement] = useState<HTMLElement | null>(null)
+  const [activePlugin, setActivePlugin] = useState<Plugin.Instance | null>(null)
 
-  const theme: ITheme = createTheme(props.theme as ITheme)
-  const styles: IStyles = createStyles(config, theme, props.styles)
+  const theme: Theme = createTheme(props.theme as Theme)
+  const styles: Styles = createStyles(config, theme, props.styles)
 
   const usedStyles = createUseStyles(styles)()
+
+  useEffect(() => {
+    const handleElementClick = (event: MouseEvent): void => {
+      const target: HTMLElement = event.target as HTMLElement
+
+      if (activePlugin && activePlugin.unload) {
+        activePlugin.unload(activeElement as HTMLElement)
+      }
+
+      const nextActivePlugin = props.plugins!.find(
+        (plugin: Plugin.Instance) =>
+          plugin.hook && plugin.hook(target, config) === true
+      )
+
+      if (!nextActivePlugin) {
+        setActiveElement(null)
+        setActivePlugin(null)
+
+        return
+      }
+
+      // trigger load event of plugin
+      nextActivePlugin.load && nextActivePlugin.load(target)
+
+      // set new active plugin
+      setActivePlugin(nextActivePlugin)
+
+      // set new active element
+      setActiveElement(target as HTMLElement)
+
+      // trigger onSelectComponent
+      props.onSelectComponent!(target)
+    }
+
+    dom && dom.addEventListener('click', handleElementClick)
+
+    return () => {
+      dom && dom.removeEventListener('click', handleElementClick)
+    }
+  }, [
+    dom,
+    config,
+    activePlugin,
+    activeElement,
+    props.plugins,
+    props.onSelectComponent
+  ])
 
   /**
    * trigger when Iframe loads the html content
@@ -68,49 +127,28 @@ function TemplateBuilder(props: IProps) {
     // inject required styles to the iframe
     injectStyle(doc, jss.createStyleSheet(styles).toString())
 
-    doc.addEventListener('click', (event: MouseEvent) =>
-      handleElementClick(event, doc)
-    )
-
-    // onLoad trigger
-    props.onLoad(doc)
-  }
-
-  /**
-   * triggers when user clicks on an element in the template
-   * @param event - the click event
-   * @param doc - the html document
-   */
-  const handleElementClick = (event: MouseEvent, doc: HTMLDocument): void => {
-    const target: HTMLElement = event.target as HTMLElement
-    const isTargetEditable: boolean =
-      target.getAttribute(config.editableAttribute as string) !== null
-
-    if (!isTargetEditable) {
-      return
-    }
-
-    resetEditableElements(doc)
-
-    setActiveElement(target as HTMLElement)
-
-    target.setAttribute('contenteditable', 'true')
-    target.focus()
+    // onLoad trigger, used setTimeout to requeue the rendering flow,
+    // then the ref object would have access to the dom object
+    setTimeout(() => props.onLoad!(doc), 0)
   }
 
   /**
    * resets the content in iframe
    */
   const resetTemplate = () => {
-    const el: HTMLIFrameElement | null = frameRef.current
+    const frame: HTMLIFrameElement | null = frameRef.current
 
     setActiveElement(null)
 
-    el!.setAttribute('srcDoc', props.html)
+    frame!.setAttribute('srcDoc', props.html)
   }
 
+  /**
+   * exposes some methods to the outside of the components
+   */
   useImperativeHandle(props.builderRef, () => ({
     getDom: () => dom,
+    addStyle: (styles: string) => injectStyle(dom as HTMLDocument, styles),
     resetTemplate
   }))
 
@@ -119,23 +157,41 @@ function TemplateBuilder(props: IProps) {
       <div className={usedStyles.container}>
         <iframe
           className={usedStyles.iframe}
+          title="uzum-frame"
           ref={frameRef}
           srcDoc={props.html}
-          title="uzum-frame"
           frameBorder="0"
           allowFullScreen
           onLoad={handleFrameLoad}
         />
 
         <ToolbarContainer frameRef={frameRef}>
-          {() => <InlineEditor activeElement={activeElement} />}
+          {() => (
+            <InlineEditor
+              activePlugin={activePlugin}
+              activeElement={activeElement}
+              config={config}
+              theme={theme}
+              styles={styles}
+            />
+          )}
         </ToolbarContainer>
 
-        <div className={usedStyles.sidebar}>-- sidebar --</div>
+        <SidePanel
+          className={usedStyles.sidebar}
+          fixedSidebar={props.fixedSidebar}
+          activePlugin={activePlugin}
+          activeElement={activeElement}
+          config={config}
+          theme={theme}
+          styles={styles}
+        />
       </div>
     </ThemeProvider>
   )
 }
+
+TemplateBuilder.defaultProps = defaultProps
 
 export default forwardRef((props: IProps, ref: RefObject<BuilderRef>) => (
   <TemplateBuilder {...props} builderRef={ref} />

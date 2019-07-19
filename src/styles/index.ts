@@ -1,23 +1,14 @@
+/* eslint-disable max-len */
+
 import jss from 'jss'
 import preset from 'jss-preset-default'
 
-import { ITheme } from '../theme'
-import { Config } from '../TemplateBuilder'
-
 jss.setup(preset())
-
-export interface IStyles {
-  global?: React.CSSProperties
-  container?: React.CSSProperties
-  sidebar?: React.CSSProperties
-  iframe?: React.CSSProperties
-  extended?: React.CSSProperties
-}
 
 export default function createStyles(
   config: Config,
-  theme: ITheme,
-  styles: IStyles = {}
+  theme: Theme,
+  styles: Styles = {}
 ): object {
   const editableAttribute: string = `[${config.editableAttribute}]`
 
@@ -31,9 +22,8 @@ export default function createStyles(
         }
       },
       '[contenteditable="true"]': {
-        // eslint-disable-next-line max-len
         border: `${theme.editableBorderWidth}px solid ${theme.editableBorderColor} !important`,
-        borderRadius: '0 3px 3px 3px',
+        borderRadius: `0 ${theme.editableBorderRadius}px ${theme.editableBorderRadius}px ${theme.editableBorderRadius}px`,
         cursor: 'pointer',
         '&:hover': {
           border: `${theme.editableBorderWidth}px solid transparent`

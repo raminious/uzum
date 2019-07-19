@@ -2,19 +2,22 @@ import { useEffect, useState } from 'react'
 import debounce from 'lodash/debounce'
 
 export function useIframeScroll(el, debounceTimer: number = 50) {
-  const [rect, setRect] = useState({
-    top: 0,
+  const [rect, setRect] = useState<ClientRect>({
+    width: 0,
+    height: 0,
     left: 0,
-    x: 0,
-    y: 0
+    right: 0,
+    top: 0,
+    bottom: 0
   })
 
   useEffect(() => {
     const ref = el.current || el
 
-    const doc = ref.contentDocument
+    const doc: HTMLDocument = ref.contentDocument
 
-    const onScroll = e => setRect(e.target.body.getBoundingClientRect())
+    const onScroll = (e: any) => setRect(e.target.body.getBoundingClientRect())
+
     const debouncedOnScroll =
       debounceTimer > 0 ? debounce(onScroll, debounceTimer) : onScroll
 

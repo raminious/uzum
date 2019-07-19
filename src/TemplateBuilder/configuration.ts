@@ -1,9 +1,7 @@
-import { Config } from '.'
-
 const defaultConfig: Config = {
   editableAttribute: 'data-editable'
 }
 
-export default function createConfiguration(config) {
+export default function createConfiguration(config: Config | null = {}) {
   return Object.assign(defaultConfig, config)
 }

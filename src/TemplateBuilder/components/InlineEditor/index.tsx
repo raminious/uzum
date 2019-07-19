@@ -1,35 +1,34 @@
-import React from 'react'
-
 interface IProps {
+  activePlugin: Plugin.Instance | null
   activeElement: HTMLElement | null
+  config: Config
+  theme: Theme
+  styles: Styles
 }
 
-export default function InlineEditor({ activeElement }: IProps) {
-  const bounds: ClientRect | { top: number; left: number } = activeElement
-    ? activeElement.getBoundingClientRect()
-    : {
-        top: 0,
-        left: 0
-      }
+export default function InlineEditor({
+  activePlugin,
+  activeElement,
+  config,
+  theme,
+  styles
+}: IProps) {
+  if (!activePlugin || !activeElement) {
+    return null
+  }
 
-  return (
-    <div
-      style={{
-        display: activeElement ? 'flex' : 'none',
-        pointerEvents: 'all',
-        position: 'absolute',
-        alignItems: 'center',
-        backgroundColor: 'RebeccaPurple',
-        borderRadius: '3px 3px 0 0',
-        color: '#fff',
-        width: '120px',
-        height: '25px',
-        padding: '0 5px',
-        top: bounds.top - 25,
-        left: bounds.left
-      }}
-    >
-      ----
-    </div>
-  )
+  if (activePlugin.inline) {
+    const bounds: ClientRect = activeElement.getBoundingClientRect()
+
+    return activePlugin.inline({
+      el: activeElement,
+      state: activePlugin.state,
+      bounds,
+      config,
+      theme,
+      styles
+    })
+  }
+
+  return null
 }

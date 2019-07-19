@@ -1,9 +1,9 @@
 import React, { useRef } from 'react'
 
-import { injectStyle } from '../../../src/TemplateBuilder/helpers/inject-style'
 import TemplateBuilder, { BuilderRef } from '../../../src/TemplateBuilder'
 
 import template from '../../../public/static/samples/tpl-1'
+import editablePlugin from './Plugins/EditablePlugin'
 
 const Examples: React.FC = () => {
   const builder = useRef<BuilderRef>({} as BuilderRef)
@@ -11,7 +11,7 @@ const Examples: React.FC = () => {
   const handleLoadTemplate = (dom: HTMLDocument) => {
     const css = 'body { margin: 0 auto !important; }'
 
-    injectStyle(dom, css)
+    builder.current.addStyle(css)
   }
 
   return (
@@ -30,6 +30,12 @@ const Examples: React.FC = () => {
       <TemplateBuilder
         html={template}
         ref={builder}
+        plugins={[
+          {
+            ...editablePlugin,
+            state: { a: 1 }
+          }
+        ]}
         config={{
           editableAttribute: 'data-editable'
         }}

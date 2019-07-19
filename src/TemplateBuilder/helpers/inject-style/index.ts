@@ -5,6 +5,10 @@ interface IStyleElement extends HTMLStyleElement {
 }
 
 export function injectStyle(dom: HTMLDocument, css: string): void {
+  if (!dom) {
+    return
+  }
+
   const style: IStyleElement = document.createElement('style')
 
   style.type = 'text/css'

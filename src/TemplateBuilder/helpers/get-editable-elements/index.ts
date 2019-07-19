@@ -1,5 +1,3 @@
-import { Config } from '../..'
-
 export function getEditableElements(
   doc: HTMLDocument | null,
   config: Config
